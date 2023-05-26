@@ -1,23 +1,46 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState } from "react";
+import { FiSearch } from 'react-icons/fi'
+import './styles.css'
+import api from "./services/api";
 
 function App() {
+
+  const [input, setInput] = useState()
+  const [cep, setCep] = useState({})
+
+  const handleSearch = async () => {
+    if (input === '') {
+      alert('Preencher CEP')
+      return;
+    }
+    try {
+      const response = await api.get(`${input}/json`)
+      console.log(response.data)
+      setCep(response.data)
+      setInput('')
+    } catch {
+      alert('Erro')
+      setInput('')
+    }
+  }
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="container">
+      <h1 className="title">Buscador CEP:</h1>
+      <div className="input">
+        <input type="text" placeholder="Digite o CEP" value={input} onChange={e => setInput(e.target.value)} />
+        <button className="search" onClick={handleSearch}>
+          <FiSearch size={25} color='#FFF' />
+        </button>
+      </div>
+      {Object.keys(cep).length > 0 && (
+        <main className='main'>
+          <h2>CEP: {cep.cep}</h2>
+          <span>Rua: {cep.logradouro}</span>
+          {cep.complemento !== '' && (<span>Complemento: {cep.complemento}</span>)}
+          <span>Bairro: {cep.bairro}</span>
+          <span>Cidade/Estado: {cep.localidade}/{cep.uf}</span>
+        </main>
+      )}
     </div>
   );
 }
